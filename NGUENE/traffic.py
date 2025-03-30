@@ -4,14 +4,12 @@ import os
 import sys
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.regularizers import l2
 
 EPOCHS = 10
 IMG_WIDTH= 30
 IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
 TEST_SIZE = 0.4
-
 
 def main():
     # Check command-line arguments
@@ -27,7 +25,7 @@ def main():
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
     x_train, x_test, y_train, y_test = train_test_split(
-        np.array(images), np.array(labels), test_size=TEST_SIZE, random_state=42
+        np.array(images), np.array(labels), test_size=TEST_SIZE
     )
 
     # Get a compiled neural network
@@ -68,6 +66,10 @@ def load_data(data_dir):
                 
                 # Resize image
                 image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+                
+                # image normalization
+                image = image / 255.0
+                                
                 # Append images and labels to the respective list
                 images.append(image)
                 labels.append(category)
@@ -83,18 +85,20 @@ def get_model():
 
         # Add a convolutional layer with 32 filters, a 3x3 kernel, ReLU activation, and input shape
         model.add(tf.keras.layers.Conv2D(
-            32, (3, 3), activation="relu", kernel_regularizer=l2(0.001), input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ))
 
         # Add a max-pooling layer with a 2x2 pool size
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-        # Add a dropout layer to reduce overfitting
-        model.add(tf.keras.layers.Dropout(0.3))
         
-        model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(0.001)))
+        # # Add a dropout layer to reduce overfitting
+        # model.add(tf.keras.layers.Dropout(0.3))
+        
+        model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu"))
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        
         # Add a dropout layer to reduce overfitting
-        model.add(tf.keras.layers.Dropout(0.3))
+        # model.add(tf.keras.layers.Dropout(0.3))
         
         model.add(tf.keras.layers.Flatten())
         

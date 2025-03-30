@@ -97,7 +97,6 @@ def file_opener():
     )
     if not file_path:
         return
-
     try:
         # Display the selected image
         image = Image.open(file_path)
