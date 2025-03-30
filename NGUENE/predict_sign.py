@@ -10,19 +10,16 @@ from tensorflow.keras.models import load_model
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
-CURRENT_DIR = os.path.dirname(__file__)
 
 # Set the model path
-MODEL_PATH = sys.argv[1] if len(sys.argv) == 2 else os.path.join(CURRENT_DIR,"best_model.h5")
-
-if not os.path.exists(MODEL_PATH):
-    sys.exit("Model not found. Please train the model first.")
+CURRENT_DIR = os.path.dirname(__file__)
+MODEL_PATH = os.path.join(CURRENT_DIR,"best_model.h5")
     
 # Load the trained model
 model = load_model(MODEL_PATH)
 
 # String representation of the gtsrb dataset categories
-GTSRB_CATEGORIES = [
+CATEGORY_STRINGS = [
     "Speed limit (20km/h)",
     "Speed limit (30km/h)",
     "Speed limit (50km/h)",
@@ -68,13 +65,13 @@ GTSRB_CATEGORIES = [
     "End of no passing by vehicles over 3.5 metric tons"
 ]
 
-def predict_image(file_path):
+def predictor_function(image_path):
     """
     Predict the category of the traffic sign in the given image file.
     """
     try:
         # Load and preprocess the image
-        image = cv2.imread(file_path)
+        image = cv2.imread(image_path)
         image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
         image = np.array(image) / 255.0  # Normalize pixel values
         image = np.expand_dims(image, axis=0)  # Add batch dimension
@@ -84,13 +81,13 @@ def predict_image(file_path):
         predicted_category = np.argmax(predictions)
         accuracy = np.max(predictions)
 
-        return predicted_category, GTSRB_CATEGORIES[predicted_category], accuracy
+        return predicted_category, CATEGORY_STRINGS[predicted_category], accuracy
     
     except Exception as e:
         messagebox.showerror("Error", f"Failed to predict image: {e}")
         return None
 
-def open_file():
+def file_opener():
     """
     Open a file dialog to select an image and display the prediction.
     """
@@ -111,7 +108,7 @@ def open_file():
         image_label.image = photo
 
         # Predict the traffic sign category
-        number, sign, probability  = predict_image(file_path)
+        number, sign, probability  = predictor_function(file_path)
         if sign and probability:
             results = f"Prediction \n Sign: {sign}, Accuracy: {probability:.2f}"
             result_label.config(text=results)
@@ -120,32 +117,23 @@ def open_file():
 
 # Create the tkinter interface
 root = tk.Tk()
-root.title("Traffic Sign Predictor")
+root.title("Road Sign Predictor")
 
-# Set dimensions of the interface
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-window_width = 500
-window_height = 400
-
-# dimension calculation
-x = (screen_width/2) - (window_width/2)
-y = (screen_height/2) - (window_height/2)
-root.geometry(f'{window_width}x{window_height}+{int(x)}+{int(y)}')
-
+root.geometry("500x500")
 
 # Create and place widgets
 frame = tk.Frame(root)
 frame.pack(pady=20)
 
-text_label = tk.Label(frame, text="Kindly Upload A Traffic Sign Image", font=("Arial", 12, "bold"))
+text_label = tk.Label(frame, text="Upload A Traffic Sign Image", font=("Arial", 14, "bold"))
 text_label.pack()
 
-button = tk.Button(frame, text="Select Image", command=open_file)
+image_label = tk.Label(frame)
+image_label.pack(pady=10)
+
+button = tk.Button(frame, text="Select Image", command=file_opener)
 button.pack(pady=10)
 
-image_label = tk.Label(frame)
-image_label.pack()
 
 result_label = tk.Label(frame, text="Predicted Category: None", font=("Arial", 12))
 result_label.pack(pady=10)

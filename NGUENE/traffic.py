@@ -73,10 +73,8 @@ def load_data(data_dir):
                 labels.append(category)
                 
         return np.array(images), np.array(labels)
-    
     except:
         raise NotImplementedError
-
 
 def get_model():
     try:
@@ -113,8 +111,8 @@ def get_model():
             loss="categorical_crossentropy",
             metrics=["accuracy"]
         )
-
         return model
+    
     except:    
         raise NotImplementedError
 
