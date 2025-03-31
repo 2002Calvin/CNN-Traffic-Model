@@ -44,7 +44,7 @@ python traffic.py path/to/data_directory path/to/model.h5
 ```
 
 6. Use the model
-Still within CALEB directory
+Still within NGUENE directory
 ```bash
 python predict_sign.py path/to/model
 ```
